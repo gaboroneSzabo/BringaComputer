@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kellys Kadencia Mérő</title>
+    <title>Kellys Phanatic 30 - MultiApp</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -14,82 +14,152 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             min-height: 100vh;
             box-sizing: border-box;
         }
         h1 {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             margin-bottom: 5px;
             color: #4CAF50;
+            text-align: center;
         }
-        .subtitle {
-            font-size: 0.9rem;
-            color: #888;
-            margin-bottom: 20px;
-        }
-        #display-container {
-            background-color: #1e1e1e;
-            border-radius: 15px;
-            padding: 30px;
+        
+        /* Navigációs menü a lapok között */
+        .nav-tabs {
+            display: flex;
             width: 100%;
             max-width: 350px;
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: #aaa;
+            padding: 10px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            box-shadow: none !important;
+        }
+        .tab-btn.active-tab {
+            background-color: #4CAF50;
+            color: black;
+        }
+
+        /* Lapok láthatósága */
+        .app-page {
+            display: none;
+            width: 100%;
+            max-width: 350px;
+            flex-direction: column;
+            align-items: center;
+        }
+        .app-page.active-page {
+            display: flex;
+        }
+
+        /* Közös kijelző doboz stílus */
+        .display-container {
+            background-color: #1e1e1e;
+            border-radius: 15px;
+            padding: 25px;
+            width: 100%;
             text-align: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            margin-bottom: 25px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
         }
         .label {
-            font-size: 1rem;
+            font-size: 0.9rem;
             text-transform: uppercase;
             letter-spacing: 1px;
             color: #aaa;
         }
-        #rpm-value {
-            font-size: 5rem;
+        .main-value {
+            font-size: 4.5rem;
             font-weight: bold;
             color: #4CAF50;
             margin: 10px 0;
         }
-        #speed-value {
+        .sub-value {
             font-size: 1.2rem;
             color: #00bcd4;
         }
         .section-title {
-            font-size: 1rem;
+            font-size: 0.9rem;
             color: #aaa;
             margin-bottom: 10px;
             align-self: flex-start;
-            max-width: 350px;
             width: 100%;
-            margin-left: auto;
-            margin-right: auto;
         }
+
+        /* Gombcsoportok a váltóhoz */
         .btn-group {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
             width: 100%;
-            max-width: 350px;
             margin-bottom: 20px;
         }
-        button {
+        .gear-btn {
             background-color: #2a2a2a;
             color: white;
             border: 2px solid #444;
-            padding: 15px 10px;
-            font-size: 1.1rem;
+            padding: 12px 5px;
+            font-size: 1rem;
             font-weight: bold;
             border-radius: 10px;
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        button.active {
+        .gear-btn.active {
             background-color: #4CAF50;
             border-color: #4CAF50;
             color: black;
             box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
         }
-        #status {
+
+        /* Gyorsulásmérő specifikus stílusok */
+        .sensor-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .sensor-box {
+            background-color: #2a2a2a;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #444;
+        }
+        .sensor-num {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ff9800;
+            margin-top: 5px;
+        }
+        .action-btn {
+            background-color: #ff9800;
+            color: black;
+            border: none;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .status-text {
             font-size: 0.85rem;
             color: #ff9800;
             margin-top: 15px;
@@ -100,111 +170,118 @@
 <body>
 
     <h1>Kellys Phanatic 30</h1>
-    <div class="subtitle">GPS Alapú Pedálfordulat Számláló</div>
-
-    <div id="display-container">
-        <div class="label">Pedálfordulat</div>
-        <div id="rpm-value">--</div>
-        <div id="speed-value">Sebesség: 0.0 km/h</div>
-        <div id="status">Keresem a GPS jelet... Érintsd meg a fokozatot!</div>
+    
+    <!-- Navigáció -->
+    <div class="nav-tabs">
+        <button class="tab-btn active-tab" onclick="switchTab('cadence-page', this)">Kadencia (GPS)</button>
+        <button class="tab-btn" onclick="switchTab('sensor-page', this)">Gyorsulásmérő</button>
     </div>
 
-    <div class="section-title">NAGYTÁNYÉR (48T) FOKOZATOK:</div>
-    <div class="btn-group">
-        <button onclick="setGear(48, 19, this)">48x5</button>
-        <button onclick="setGear(48, 17, this)" class="active">48x6</button>
-        <button onclick="setGear(48, 15, this)">48x7</button>
+    <!-- 1. OLDAL: KADENCIA MÉRŐ -->
+    <div id="cadence-page" class="app-page active-page">
+        <div class="display-container">
+            <div class="label">Pedálfordulat</div>
+            <div id="rpm-value" class="main-value">--</div>
+            <div id="speed-value" class="sub-value">Sebesség: 0.0 km/h</div>
+            <div id="gps-status" class="status-text">Keresem a GPS jelet...</div>
+        </div>
+
+        <div class="section-title">NAGYTÁNYÉR (48T) FOKOZATOK:</div>
+        <div class="btn-group">
+            <button class="gear-btn" onclick="setGear(48, 19, this)">48x5</button>
+            <button class="gear-btn active" onclick="setGear(48, 17, this)">48x6</button>
+            <button class="gear-btn" onclick="setGear(48, 15, this)">48x7</button>
+        </div>
+
+        <div class="section-title">KÖZÉPSŐ TÁNYÉR (36T) FOKOZATOK:</div>
+        <div class="btn-group">
+            <button class="gear-btn" onclick="setGear(36, 15, this)">36x7</button>
+            <button class="gear-btn" onclick="setGear(36, 13, this)">36x8</button>
+            <button class="gear-btn" onclick="setGear(36, 11, this)">36x9</button>
+        </div>
     </div>
 
-    <div class="section-title">KÖZÉPSŐ TÁNYÉR (36T) FOKOZATOK:</div>
-    <div class="btn-group">
-        <button onclick="setGear(36, 15, this)">36x7</button>
-        <button onclick="setGear(36, 13, this)">36x8</button>
-        <button onclick="setGear(36, 11, this)">36x9</button>
+    <!-- 2. OLDAL: GYORSULÁSMÉRŐ TESZT -->
+    <div id="sensor-page" class="app-page">
+        <button class="action-btn" onclick="startSensors()">Szenzorok engedélyezése</button>
+        
+        <div class="display-container">
+            <div class="label">Aktuális dőlésszög</div>
+            <div id="tilt-value" class="main-value">0°</div>
+            <div id="sensor-status" class="status-text">Kattints a fenti gombra az indításhoz!</div>
+            
+            <div class="sensor-grid">
+                <div class="sensor-box">
+                    <div class="label">X tengely (Oldal)</div>
+                    <div id="acc-x" class="sensor-num">0.00</div>
+                </div>
+                <div class="sensor-box">
+                    <div class="label">Y tengely (Előre)</div>
+                    <div id="acc-y" class="sensor-num">0.00</div>
+                </div>
+                <div class="sensor-box">
+                    <div class="label">Z tengely (Függ.)</div>
+                    <div id="acc-z" class="sensor-num">0.00</div>
+                </div>
+                <div class="sensor-box">
+                    <div class="label">Össz. erő (G)</div>
+                    <div id="acc-g" class="sensor-num">0.00</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Kerékkerület mm-ben (Cross Trekking szabvány: 700x40C gumi)
-        const WHEEL_CIRCUMFERENCE = 2200; 
-        
-        // Alapértelmezett áttétel (Induláskor a 48x6 aktív)
+        // --- LAPVÁLTÓ LOGIKA ---
+        function switchTab(pageId, element) {
+            document.querySelectorAll('.app-page').forEach(page => page.classList.remove('active-page'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active-tab'));
+            
+            document.getElementById(pageId).classList.add('active-page');
+            element.classList.add('active-tab');
+        }
+
+        // --- KADENCIA (GPS) LOGIKA ---
+        const WHEEL_CIRCUMFERENCE = 2200; // 700x40C gumi mm-ben
         let frontTeeth = 48;
         let rearTeeth = 17;
         let currentSpeedKmh = 0;
 
-        // Fokozatváltás kezelése a gombokkal
         function setGear(front, rear, element) {
             frontTeeth = front;
             rearTeeth = rear;
-            
-            // Aktív gomb stílusának frissítése
-            document.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.gear-btn').forEach(btn => btn.classList.remove('active'));
             element.classList.add('active');
-            
-            // Azonnali újraszámolás a meglévő sebességgel
-            updateDisplay();
+            updateCadenceDisplay();
         }
 
-        // Matematikai számítás és kijelzés frissítése
-        function updateDisplay() {
+        function updateCadenceDisplay() {
             if (currentSpeedKmh <= 1) {
-                // Ha állsz vagy nagyon lassan mész, ne írjon ki fals adatot
                 document.getElementById('rpm-value').innerText = "--";
                 document.getElementById('speed-value').innerText = `Sebesség: ${currentSpeedKmh.toFixed(1)} km/h`;
                 return;
             }
-
-            // Áttételi arány kiszámítása
             const gearRatio = frontTeeth / rearTeeth;
-
-            // A matematikai képlet: RPM = (Sebesség * 16666.67) / (Kerület * Áttétel)
             const rpm = (currentSpeedKmh * 16666.67) / (WHEEL_CIRCUMFERENCE * gearRatio);
-
-            // Kijelzők frissítése
             document.getElementById('rpm-value').innerText = Math.round(rpm);
             document.getElementById('speed-value').innerText = `Sebesség: ${currentSpeedKmh.toFixed(1)} km/h`;
         }
 
-        // GPS Geolocation API indítása
         if ("geolocation" in navigator) {
             navigator.geolocation.watchPosition(
                 function(position) {
-                    // A koordinátákból kinyerjük a sebességet (m/s-ban kapjuk meg!)
                     let speedMs = position.coords.speed;
-                    
                     if (speedMs !== null && speedMs !== undefined) {
-                        // Átváltás m/s-ból km/h-ba
                         currentSpeedKmh = speedMs * 3.6;
-                        document.getElementById('status').innerText = "GPS kapcsolat aktív ✔";
-                        document.getElementById('status').style.color = "#4CAF50";
+                        document.getElementById('gps-status').innerText = "GPS kapcsolat aktív ✔";
+                        document.getElementById('gps-status').style.color = "#4CAF50";
                     } else {
-                        document.getElementById('status').innerText = "Mozogj a bringával a méréshez!";
-                        document.getElementById('status').style.color = "#ff9800";
+                        document.getElementById('gps-status').innerText = "Mozogj a bringával a méréshez!";
+                        document.getElementById('gps-status').style.color = "#ff9800";
                         currentSpeedKmh = 0;
                     }
-                    updateDisplay();
+                    updateCadenceDisplay();
                 },
                 function(error) {
-                    // Hibakezelés (pl. ha a felhasználó letiltotta a GPS-t)
-                    const statusDiv = document.getElementById('status');
-                    statusDiv.style.color = "#f44336";
-                    if (error.code === 1) {
-                        statusDiv.innerText = "Hiba: Engedélyezned kell a GPS-t a böngészőben!";
-                    } else {
-                        statusDiv.innerText = "Hiba: Nem sikerült lekérni a GPS pozíciót.";
-                    }
-                },
-                {
-                    enableHighAccuracy: true, // Maximális pontosság kérése (GPS chip használata)
-                    maximumAge: 0,            // Ne használjon régi gyorsítótárazott pozíciót
-                    timeout: 5000             // 5 másodperc időtúllépés
-                }
-            );
-        } else {
-            document.getElementById('status').innerText = "A böngésződ nem támogatja a GPS-t.";
-            document.getElementById('status').style.color = "#f44336";
-        }
-    </script>
-</body>
-</html>
-
+                    const statusDiv = document.getElementById('gps-status');
+statusDiv.style.color = "#f44336";statusDiv.innerText = error.code === 1 ? "Engedélyezd a GPS-t!" : "GPS jel hiba.";},{ enableHighAccuracy: true, maximumAge: 0, timeout: 5000 });}// --- GYORSULÁSMÉRŐ (ACCELEROMETER) LOGIKA ---function startSensors() {// Ellenőrizzük, hogy iOS eszközről van-e szó, mert ott külön ablakos engedélykérés kellif (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {DeviceMotionEvent.requestPermission().then(permissionState => {if (permissionState === 'granted') {activateMotionListener();} else {document.getElementById('sensor-status').innerText = "Megtagadott szenzor hozzáférés.";document.getElementById('sensor-status').style.color = "#f44336";}}).catch(console.error);} else {// Android vagy asztali böngésző esetén közvetlenül indulhatactivateMotionListener();}}function activateMotionListener() {window.addEventListener('devicemotion', function(event) {// Gravitációval növelt gyorsulási adatok lekérése (m/s²)let x = event.accelerationIncludingGravity.x || 0;let y = event.accelerationIncludingGravity.y || 0;let z = event.accelerationIncludingGravity.z || 0;// Ha a telefon fejjel lefelé vagy tükrözve van, néhány rendszer előjelet vált, finomítunk rajta vizuálisandocument.getElementById('acc-x').innerText = x.toFixed(2);document.getElementById('acc-y').innerText = y.toFixed(2);document.getElementById('acc-z').innerText = z.toFixed(2);// Kiszámoljuk az eredő gyorsulást (vektoriális összegzés)let totalG = Math.sqrt(xx + yy + z*z) / 9.81; // Átváltás G egységbedocument.getElementById('acc-g').innerText = totalG.toFixed(2) + " G";// Egyszerűsített dőlésszög számítás (Y és Z tengely alapján, fokban)// Azt méri, hogy a kormányon lévő telefon mennyire dől előre/hátralet tiltRad = Math.atan2(y, z);let tiltDeg = tiltRad * (180 / Math.PI);// Korrigáljuk, hogy ha függőlegesen áll a kormányon, akkor legyen kb 0 foklet normalizedTilt = Math.round(tiltDeg);document.getElementById('tilt-value').innerText = normalizedTilt + "°";document.getElementById('sensor-status').innerText = "Szenzorok aktívak ✔";document.getElementById('sensor-status').style.color = "#4CAF50";}, true);}
