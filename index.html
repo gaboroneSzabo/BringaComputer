@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kellys Kadencia Mérő</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            color: #4CAF50;
+        }
+        .subtitle {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 20px;
+        }
+        #display-container {
+            background-color: #1e1e1e;
+            border-radius: 15px;
+            padding: 30px;
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            margin-bottom: 25px;
+        }
+        .label {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #aaa;
+        }
+        #rpm-value {
+            font-size: 5rem;
+            font-weight: bold;
+            color: #4CAF50;
+            margin: 10px 0;
+        }
+        #speed-value {
+            font-size: 1.2rem;
+            color: #00bcd4;
+        }
+        .section-title {
+            font-size: 1rem;
+            color: #aaa;
+            margin-bottom: 10px;
+            align-self: flex-start;
+            max-width: 350px;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .btn-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            width: 100%;
+            max-width: 350px;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #2a2a2a;
+            color: white;
+            border: 2px solid #444;
+            padding: 15px 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        button.active {
+            background-color: #4CAF50;
+            border-color: #4CAF50;
+            color: black;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+        #status {
+            font-size: 0.85rem;
+            color: #ff9800;
+            margin-top: 15px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Kellys Phanatic 30</h1>
+    <div class="subtitle">GPS Alapú Pedálfordulat Számláló</div>
+
+    <div id="display-container">
+        <div class="label">Pedálfordulat</div>
+        <div id="rpm-value">--</div>
+        <div id="speed-value">Sebesség: 0.0 km/h</div>
+        <div id="status">Keresem a GPS jelet... Érintsd meg a fokozatot!</div>
+    </div>
+
+    <div class="section-title">NAGYTÁNYÉR (48T) FOKOZATOK:</div>
+    <div class="btn-group">
+        <button onclick="setGear(48, 19, this)">48x5</button>
+        <button onclick="setGear(48, 17, this)" class="active">48x6</button>
+        <button onclick="setGear(48, 15, this)">48x7</button>
+    </div>
+
+    <div class="section-title">KÖZÉPSŐ TÁNYÉR (36T) FOKOZATOK:</div>
+    <div class="btn-group">
+        <button onclick="setGear(36, 15, this)">36x7</button>
+        <button onclick="setGear(36, 13, this)">36x8</button>
+        <button onclick="setGear(36, 11, this)">36x9</button>
+    </div>
+
+    <script>
+        // Kerékkerület mm-ben (Cross Trekking szabvány: 700x40C gumi)
+        const WHEEL_CIRCUMFERENCE = 2200; 
+        
+        // Alapértelmezett áttétel (Induláskor a 48x6 aktív)
+        let frontTeeth = 48;
+        let rearTeeth = 17;
+        let currentSpeedKmh = 0;
+
+        // Fokozatváltás kezelése a gombokkal
+        function setGear(front, rear, element) {
+            frontTeeth = front;
+            rearTeeth = rear;
+            
+            // Aktív gomb stílusának frissítése
+            document.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+            
+            // Azonnali újraszámolás a meglévő sebességgel
+            updateDisplay();
+        }
+
+        // Matematikai számítás és kijelzés frissítése
+        function updateDisplay() {
+            if (currentSpeedKmh <= 1) {
+                // Ha állsz vagy nagyon lassan mész, ne írjon ki fals adatot
+                document.getElementById('rpm-value').innerText = "--";
+                document.getElementById('speed-value').innerText = `Sebesség: ${currentSpeedKmh.toFixed(1)} km/h`;
+                return;
+            }
+
+            // Áttételi arány kiszámítása
+            const gearRatio = frontTeeth / rearTeeth;
+
+            // A matematikai képlet: RPM = (Sebesség * 16666.67) / (Kerület * Áttétel)
+            const rpm = (currentSpeedKmh * 16666.67) / (WHEEL_CIRCUMFERENCE * gearRatio);
+
+            // Kijelzők frissítése
+            document.getElementById('rpm-value').innerText = Math.round(rpm);
+            document.getElementById('speed-value').innerText = `Sebesség: ${currentSpeedKmh.toFixed(1)} km/h`;
+        }
+
+        // GPS Geolocation API indítása
+        if ("geolocation" in navigator) {
+            navigator.geolocation.watchPosition(
+                function(position) {
+                    // A koordinátákból kinyerjük a sebességet (m/s-ban kapjuk meg!)
+                    let speedMs = position.coords.speed;
+                    
+                    if (speedMs !== null && speedMs !== undefined) {
+                        // Átváltás m/s-ból km/h-ba
+                        currentSpeedKmh = speedMs * 3.6;
+                        document.getElementById('status').innerText = "GPS kapcsolat aktív ✔";
+                        document.getElementById('status').style.color = "#4CAF50";
+                    } else {
+                        document.getElementById('status').innerText = "Mozogj a bringával a méréshez!";
+                        document.getElementById('status').style.color = "#ff9800";
+                        currentSpeedKmh = 0;
+                    }
+                    updateDisplay();
+                },
+                function(error) {
+                    // Hibakezelés (pl. ha a felhasználó letiltotta a GPS-t)
+                    const statusDiv = document.getElementById('status');
+                    statusDiv.style.color = "#f44336";
+                    if (error.code === 1) {
+                        statusDiv.innerText = "Hiba: Engedélyezned kell a GPS-t a böngészőben!";
+                    } else {
+                        statusDiv.innerText = "Hiba: Nem sikerült lekérni a GPS pozíciót.";
+                    }
+                },
+                {
+                    enableHighAccuracy: true, // Maximális pontosság kérése (GPS chip használata)
+                    maximumAge: 0,            // Ne használjon régi gyorsítótárazott pozíciót
+                    timeout: 5000             // 5 másodperc időtúllépés
+                }
+            );
+        } else {
+            document.getElementById('status').innerText = "A böngésződ nem támogatja a GPS-t.";
+            document.getElementById('status').style.color = "#f44336";
+        }
+    </script>
+</body>
+</html>
+
