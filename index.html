@@ -28,7 +28,8 @@
 
         /* Navigációs menü a lapok között */
         .nav-tabs {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             width: 100%;
             max-width: 350px;
             background-color: #1e1e1e;
@@ -326,26 +327,130 @@
                 transform: scale(1.08);
             }
         }
+
+        .speed-source-switch {display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-bottom:14px;}
+        .source-btn {background:#2a2a2a;color:#aaa;border:2px solid #444;padding:11px 8px;border-radius:9px;font-weight:bold;cursor:pointer;}
+        .source-btn.active {background:#00bcd4;border-color:#00bcd4;color:#111;}
+        .arduino-connect-btn {display:none;width:100%;margin-bottom:12px;padding:12px;border:0;border-radius:9px;background:#ff9800;color:#111;font-weight:bold;cursor:pointer;}
+        .arduino-connect-btn.visible {display:block;}
+
+
+        .bike-list{display:grid;gap:10px;width:100%;margin-bottom:18px}.bike-card{width:100%;padding:14px;border:2px solid #444;border-radius:10px;background:#242424;color:white;text-align:left;cursor:pointer}.bike-card.active{border-color:#4CAF50;background:#203522}.bike-card-title{font-size:1.05rem;font-weight:bold;margin-bottom:5px}.bike-card-details{color:#aaa;font-size:.82rem;line-height:1.45}.bike-form{width:100%}.bike-form label{display:block;color:#aaa;font-size:.82rem;margin:12px 0 6px}.bike-form input{width:100%;padding:12px;border:1px solid #444;border-radius:8px;background:#292929;color:white;font-size:1rem;box-sizing:border-box}.bike-form-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}.bike-save-btn,.bike-new-btn{padding:13px;border-radius:9px;font-weight:bold;cursor:pointer}.bike-save-btn{border:none;background:#4CAF50;color:#111}.bike-new-btn{background:transparent;color:#00bcd4;border:2px solid #00bcd4}.bike-help{color:#777;font-size:.75rem;line-height:1.4;margin-top:8px}
+
+
+        .recommendation-list {
+            display: grid;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .recommendation-card {
+            position: relative;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #444;
+            border-radius: 12px;
+            background: #242424;
+            box-sizing: border-box;
+        }
+
+        .recommendation-card.best {
+            border-color: #4CAF50;
+            background: #203522;
+            box-shadow: 0 0 12px rgba(76, 175, 80, 0.25);
+        }
+
+        .recommendation-rank {
+            position: absolute;
+            top: 7px;
+            right: 8px;
+            min-width: 25px;
+            height: 25px;
+            padding: 0 6px;
+            border-radius: 999px;
+            background: #111;
+            color: #aaa;
+            font-size: 0.75rem;
+            line-height: 25px;
+            text-align: center;
+        }
+
+        .recommendation-card.best .recommendation-rank {
+            color: #4CAF50;
+        }
+
+        .recommendation-gears {
+            font-size: 1.55rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .recommendation-shifter {
+            margin-top: 5px;
+            color: #aaa;
+            font-size: 0.82rem;
+        }
+
+        .recommendation-rpm {
+            padding-right: 18px;
+            color: #00bcd4;
+            font-size: 1.65rem;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .recommendation-rpm small {
+            display: block;
+            color: #777;
+            font-size: 0.7rem;
+            font-weight: normal;
+        }
+
+        .recommendation-message {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            background: #1e1e1e;
+            color: #aaa;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .cadence-range {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
     </style>
 </head>
 
 <body>
 
-    <h1>Kellys Phanatic 30</h1>
+    <h1 id="app-title">Kellys Phanatic 30</h1>
 
     <!-- Navigáció -->
     <div class="nav-tabs">
-        <button class="tab-btn active-tab" onclick="switchTab('cadence-page', this)">Kadencia (GPS)</button>
+        <button class="tab-btn active-tab" onclick="switchTab('cadence-page', this)">Kadencia</button>
+        <button class="tab-btn" onclick="switchTab('recommendation-page', this)">Ajánlott fokozat</button>
         <button class="tab-btn" onclick="switchTab('sensor-page', this)">Gyorsulásmérő</button>
+        <button class="tab-btn" onclick="switchTab('bikes-page', this)">Biciklik</button>
     </div>
 
     <!-- 1. OLDAL: KADENCIA MÉRŐ -->
     <div id="cadence-page" class="app-page active-page">
+        <div class="speed-source-switch">
+            <button id="gps-source-btn" class="source-btn active" onclick="setSpeedSource('gps')">GPS</button>
+            <button id="arduino-source-btn" class="source-btn" onclick="setSpeedSource('arduino')">Arduino</button>
+        </div>
+        <button id="arduino-connect-btn" class="arduino-connect-btn" onclick="connectArduinoWebUSB()">Arduino csatlakoztatása</button>
         <div class="display-container">
             <div class="label">Pedálfordulat</div>
             <div id="rpm-value" class="main-value">--</div>
             <div id="speed-value" class="sub-value">Sebesség: 0.0 km/h</div>
-            <div id="gps-status" class="status-text">Keresem a GPS jelet...</div>
+            <div id="speed-status" class="status-text">Keresem a GPS jelet...</div>
         </div>
 
         <div id="selected-gear" class="selected-gear">Aktív fokozat: 36 × 17</div>
@@ -360,6 +465,27 @@
         <div id="rear-selector" class="gear-selector">
             <div id="rear-window" class="gear-window"></div>
             <div class="swipe-hint">← Húzd jobbra vagy balra →</div>
+        </div>
+    </div>
+
+
+    <!-- AJÁNLOTT FOKOZAT NÉZET -->
+    <div id="recommendation-page" class="app-page">
+        <div class="display-container">
+            <div class="label">Aktuális sebesség</div>
+            <div id="recommendation-speed" class="main-value">0.0</div>
+            <div class="sub-value">km/h</div>
+            <div class="status-text">
+                Célkadencia:
+                <span class="cadence-range">80–100 rpm</span>
+            </div>
+        </div>
+
+        <div class="section-title">A 3 LEGJOBB FOKOZAT:</div>
+        <div id="recommendation-list" class="recommendation-list">
+            <div class="recommendation-message">
+                GPS sebességre várok...
+            </div>
         </div>
     </div>
 
@@ -394,6 +520,22 @@
         </div>
     </div>
 
+
+    <div id="bikes-page" class="app-page">
+        <div class="display-container"><div class="label">Aktív bicikli</div><div id="active-bike-name" class="sub-value">Kellys Phanatic 30</div></div>
+        <div class="section-title">MENTETT BICIKLIK:</div><div id="bike-list" class="bike-list"></div>
+        <div class="section-title">BICIKLI ADATAI:</div>
+        <div class="bike-form">
+            <input id="bike-id" type="hidden">
+            <label for="bike-name">Név</label><input id="bike-name" type="text">
+            <label for="bike-wheel">Kerék kerülete milliméterben</label><input id="bike-wheel" type="number" min="1000" max="3000">
+            <label for="bike-front">Első lánctányérok</label><input id="bike-front" type="text" placeholder="48,38,28">
+            <label for="bike-rear">Hátsó lánckerekek, kicsitől nagyig</label><input id="bike-rear" type="text" placeholder="14,16,18,21,24,28">
+            <div class="bike-help">A legkisebb hátsó lánckerék a legmagasabb váltófokozat. Példa: 14T = 6, 28T = 1.</div>
+            <div class="bike-form-actions"><button class="bike-new-btn" onclick="newBikeForm()">Új bicikli</button><button class="bike-save-btn" onclick="saveBike()">Mentés</button></div>
+        </div>
+    </div>
+
     <script>
         // --- LAPVÁLTÓ LOGIKA ---
         function switchTab(pageId, element) {
@@ -405,17 +547,34 @@
         }
 
         // --- KADENCIA (GPS) LOGIKA ---
-        const WHEEL_CIRCUMFERENCE = 2200; // 700x40C gumi mm-ben
-        const FRONT_GEARS = [48, 36, 26];
-        const REAR_GEARS = [11, 13, 15, 17, 19, 21, 24, 28, 32];
-
-        // A középső elem az aktív.
-        let frontIndex = 1; // 36T
-        let rearIndex = 3;  // 17T
-
-        let frontTeeth = FRONT_GEARS[frontIndex];
-        let rearTeeth = REAR_GEARS[rearIndex];
+        const DEFAULT_BIKES = [
+            {id:"kellys-phanatic-30",name:"Kellys Phanatic 30",wheelCircumference:2200,frontGears:[48,36,26],rearGears:[11,13,15,17,19,21,24,28,32]},
+            {id:"sztrada",name:"Sztrada",wheelCircumference:2070,frontGears:[48,38,28],rearGears:[14,16,18,21,24,28]}
+        ];
+        let bikes=loadBikes();
+        let activeBikeId=localStorage.getItem("activeBikeId")||"kellys-phanatic-30";
+        let activeBike=bikes.find(b=>b.id===activeBikeId)||bikes[0];
+        let WHEEL_CIRCUMFERENCE=activeBike.wheelCircumference;
+        let FRONT_GEARS=[...activeBike.frontGears];
+        let REAR_GEARS=[...activeBike.rearGears];
+        let frontIndex=Math.floor(FRONT_GEARS.length/2);
+        let rearIndex=Math.floor(REAR_GEARS.length/2);
+        let frontTeeth=FRONT_GEARS[frontIndex];
+        let rearTeeth=REAR_GEARS[rearIndex];
         let currentSpeedKmh = 0;
+        let speedSource = "gps";
+
+        const ARDUINO_VENDOR_ID = 0x2341;
+        const ARDUINO_PRODUCT_ID = 0x8036;
+        const WEBUSB_INTERFACE = 2;
+        const WEBUSB_ENDPOINT_IN = 5;
+        const WEBUSB_PACKET_SIZE = 64;
+
+        let arduinoDevice = null;
+        let arduinoConnected = false;
+        let arduinoReadBuffer = "";
+        let lastArduinoPulseTime = null;
+        let arduinoStopTimer = null;
 
         let currentRawTilt = 0;
         let tiltOffset = 0;
@@ -423,11 +582,22 @@
         function zeroTilt() {
             tiltOffset = currentRawTilt;
 
-            document.getElementById("tilt-value").innerText = "0°";
+            displayedTilt = 0;
+            document.getElementById("tilt-value").innerText = "0.0°";
             document.getElementById("sensor-status").innerText =
                 "Aktuális pozíció nullázva ✔";
             document.getElementById("sensor-status").style.color = "#4CAF50";
         }
+
+        function loadBikes(){try{const saved=JSON.parse(localStorage.getItem("bikes"));if(Array.isArray(saved)&&saved.length){const merged=[...saved];for(const d of DEFAULT_BIKES)if(!merged.some(b=>b.id===d.id))merged.push(d);return merged}}catch(e){console.error(e)}return DEFAULT_BIKES.map(b=>({...b,frontGears:[...b.frontGears],rearGears:[...b.rearGears]}))}
+        function persistBikes(){localStorage.setItem("bikes",JSON.stringify(bikes))}
+        function parseGearList(v){return v.split(",").map(x=>parseInt(x.trim(),10)).filter(x=>Number.isInteger(x)&&x>0)}
+        function createBikeId(name){const base=name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"bike";let id=base,n=2;while(bikes.some(b=>b.id===id))id=`${base}-${n++}`;return id}
+        function selectBike(id){const b=bikes.find(x=>x.id===id);if(!b)return;activeBikeId=id;activeBike=b;localStorage.setItem("activeBikeId",id);WHEEL_CIRCUMFERENCE=b.wheelCircumference;FRONT_GEARS=[...b.frontGears];REAR_GEARS=[...b.rearGears];frontIndex=Math.floor(FRONT_GEARS.length/2);rearIndex=Math.floor(REAR_GEARS.length/2);frontTeeth=FRONT_GEARS[frontIndex];rearTeeth=REAR_GEARS[rearIndex];document.getElementById("app-title").innerText=b.name;document.getElementById("active-bike-name").innerText=b.name;renderBikeList();fillBikeForm(b);renderAllGearSelectors();updateCadenceDisplay()}
+        function renderBikeList(){const list=document.getElementById("bike-list");list.innerHTML="";for(const b of bikes){const el=document.createElement("button");el.className="bike-card"+(b.id===activeBikeId?" active":"");el.innerHTML=`<div class="bike-card-title">${b.name}</div><div class="bike-card-details">${b.frontGears.length}×${b.rearGears.length} sebesség · ${b.wheelCircumference} mm<br>Elöl: ${b.frontGears.join("-")}T · Hátul: ${b.rearGears.join("-")}T</div>`;el.onclick=()=>selectBike(b.id);list.appendChild(el)}}
+        function fillBikeForm(b){document.getElementById("bike-id").value=b.id;document.getElementById("bike-name").value=b.name;document.getElementById("bike-wheel").value=b.wheelCircumference;document.getElementById("bike-front").value=b.frontGears.join(",");document.getElementById("bike-rear").value=b.rearGears.join(",")}
+        function newBikeForm(){document.getElementById("bike-id").value="";document.getElementById("bike-name").value="";document.getElementById("bike-wheel").value="2100";document.getElementById("bike-front").value="48,38,28";document.getElementById("bike-rear").value="14,16,18,21,24,28"}
+        function saveBike(){const oldId=document.getElementById("bike-id").value.trim(),name=document.getElementById("bike-name").value.trim(),wheel=parseInt(document.getElementById("bike-wheel").value,10),front=parseGearList(document.getElementById("bike-front").value),rear=parseGearList(document.getElementById("bike-rear").value);if(!name)return alert("Adj nevet a biciklinek.");if(!Number.isInteger(wheel)||wheel<1000||wheel>3000)return alert("Hibás kerékkerület.");if(!front.length||!rear.length)return alert("Adj meg fogszámokat.");const b={id:oldId||createBikeId(name),name,wheelCircumference:wheel,frontGears:[...front].sort((a,b)=>b-a),rearGears:[...rear].sort((a,b)=>a-b)};const i=bikes.findIndex(x=>x.id===b.id);if(i>=0)bikes[i]=b;else bikes.push(b);persistBikes();selectBike(b.id)}
 
         function wrappedIndex(index, length) {
             return (index + length) % length;
@@ -564,19 +734,249 @@
             });
         }
 
+
+        function setSpeedSource(source) {
+            speedSource = source;
+            document.getElementById("gps-source-btn").classList.toggle("active", source === "gps");
+            document.getElementById("arduino-source-btn").classList.toggle("active", source === "arduino");
+            document.getElementById("arduino-connect-btn").classList.toggle("visible", source === "arduino");
+            const status = document.getElementById("speed-status");
+            if (source === "gps") {
+                status.innerText = "GPS sebességforrás aktív";
+                status.style.color = "#4CAF50";
+            } else if (arduinoConnected) {
+                status.innerText = "Arduino sebességforrás aktív ✔";
+                status.style.color = "#4CAF50";
+            } else {
+                currentSpeedKmh = 0;
+                status.innerText = "Csatlakoztasd az Arduinót";
+                status.style.color = "#ff9800";
+                updateCadenceDisplay();
+            }
+        }
+
+        async function connectArduinoWebUSB() {
+            const status = document.getElementById("speed-status");
+            if (!("usb" in navigator)) {
+                status.innerText = "A böngésző nem támogatja a WebUSB-t.";
+                status.style.color = "#f44336";
+                return;
+            }
+            try {
+                arduinoDevice = await navigator.usb.requestDevice({filters:[{vendorId:ARDUINO_VENDOR_ID,productId:ARDUINO_PRODUCT_ID}]});
+                await arduinoDevice.open();
+                if (arduinoDevice.configuration === null) await arduinoDevice.selectConfiguration(1);
+                await arduinoDevice.claimInterface(WEBUSB_INTERFACE);
+                await arduinoDevice.selectAlternateInterface(WEBUSB_INTERFACE,0);
+                await arduinoDevice.controlTransferOut({requestType:"class",recipient:"interface",request:0x22,value:0x01,index:WEBUSB_INTERFACE});
+                arduinoConnected = true;
+                lastArduinoPulseTime = null;
+                currentSpeedKmh = 0;
+                status.innerText = "Arduino csatlakoztatva, impulzusra várok...";
+                status.style.color = "#4CAF50";
+                readArduinoWebUSB();
+            } catch (error) {
+                console.error(error);
+                arduinoConnected = false;
+                arduinoDevice = null;
+                status.innerText = error.name === "NotFoundError" ? "Nem választottál Arduino eszközt." : "Arduino hiba: " + error.message;
+                status.style.color = "#f44336";
+            }
+        }
+
+        async function readArduinoWebUSB() {
+            const decoder = new TextDecoder();
+            while (arduinoConnected && arduinoDevice?.opened) {
+                try {
+                    const result = await arduinoDevice.transferIn(WEBUSB_ENDPOINT_IN, WEBUSB_PACKET_SIZE);
+                    if (result.status !== "ok" || !result.data) continue;
+                    arduinoReadBuffer += decoder.decode(result.data,{stream:true});
+                    const lines = arduinoReadBuffer.split(/\r?\n/);
+                    arduinoReadBuffer = lines.pop() ?? "";
+                    for (const line of lines) processArduinoLine(line.trim());
+                } catch (error) {
+                    console.error(error);
+                    arduinoConnected = false;
+                    const status = document.getElementById("speed-status");
+                    status.innerText = "Arduino kapcsolat megszakadt.";
+                    status.style.color = "#f44336";
+                }
+            }
+        }
+
+        function processArduinoLine(line) {
+            if (!line.startsWith("PULSE:")) return;
+            const now = performance.now();
+            if (lastArduinoPulseTime !== null) {
+                const elapsedSeconds = (now - lastArduinoPulseTime) / 1000;
+                if (elapsedSeconds > 0.05) {
+                    const wheelCircumferenceM = WHEEL_CIRCUMFERENCE / 1000;
+                    currentSpeedKmh = (wheelCircumferenceM / elapsedSeconds) * 3.6;
+                    if (speedSource === "arduino") {
+                        const status = document.getElementById("speed-status");
+                        status.innerText = "Arduino kerékszenzor aktív ✔";
+                        status.style.color = "#4CAF50";
+                        updateCadenceDisplay();
+                    }
+                }
+            }
+            lastArduinoPulseTime = now;
+            clearTimeout(arduinoStopTimer);
+            arduinoStopTimer = setTimeout(() => {
+                if (speedSource === "arduino") {
+                    currentSpeedKmh = 0;
+                    updateCadenceDisplay();
+                    const status = document.getElementById("speed-status");
+                    status.innerText = "Arduino csatlakoztatva, a kerék áll";
+                    status.style.color = "#ff9800";
+                }
+            }, 3000);
+        }
+
+
+        function calculateCadenceForGear(front, rear, speedKmh) {
+            if (speedKmh <= 0) {
+                return 0;
+            }
+
+            const gearRatio = front / rear;
+
+            return (
+                speedKmh * 16666.67
+            ) / (
+                WHEEL_CIRCUMFERENCE * gearRatio
+            );
+        }
+
+        function getGearRecommendations() {
+            const targetCadence = 90;
+            const combinations = [];
+
+            FRONT_GEARS.forEach((front, frontIndexValue) => {
+                REAR_GEARS.forEach((rear, rearIndexValue) => {
+                    const rpm = calculateCadenceForGear(
+                        front,
+                        rear,
+                        currentSpeedKmh
+                    );
+
+                    const inTargetRange = rpm >= 80 && rpm <= 100;
+
+                    combinations.push({
+                        front,
+                        rear,
+                        rpm,
+                        frontNumber:
+                            FRONT_GEARS.length - frontIndexValue,
+                        rearNumber:
+                            REAR_GEARS.length - rearIndexValue,
+                        inTargetRange,
+                        distanceFromTarget:
+                            Math.abs(rpm - targetCadence)
+                    });
+                });
+            });
+
+            combinations.sort((a, b) => {
+                if (a.inTargetRange !== b.inTargetRange) {
+                    return a.inTargetRange ? -1 : 1;
+                }
+
+                return (
+                    a.distanceFromTarget -
+                    b.distanceFromTarget
+                );
+            });
+
+            return combinations.slice(0, 3);
+        }
+
+        function updateGearRecommendations() {
+            const speedElement =
+                document.getElementById("recommendation-speed");
+            const list =
+                document.getElementById("recommendation-list");
+
+            if (!speedElement || !list) {
+                return;
+            }
+
+            speedElement.innerText =
+                currentSpeedKmh.toFixed(1);
+
+            if (currentSpeedKmh <= 1) {
+                list.innerHTML = `
+                    <div class="recommendation-message">
+                        A fokozatajánláshoz legalább
+                        1 km/h sebesség szükséges.
+                    </div>
+                `;
+                return;
+            }
+
+            const recommendations =
+                getGearRecommendations();
+
+            list.innerHTML = "";
+
+            recommendations.forEach((gear, index) => {
+                const card =
+                    document.createElement("div");
+
+                card.className =
+                    "recommendation-card" +
+                    (index === 0 ? " best" : "");
+
+                const rangeText = gear.inTargetRange
+                    ? "céltartományban"
+                    : gear.rpm < 80
+                        ? "alacsony kadencia"
+                        : "magas kadencia";
+
+                card.innerHTML = `
+                    <div>
+                        <div class="recommendation-gears">
+                            ${gear.front}T × ${gear.rear}T
+                        </div>
+                        <div class="recommendation-shifter">
+                            Váltó: elöl ${gear.frontNumber},
+                            hátul ${gear.rearNumber} ·
+                            ${rangeText}
+                        </div>
+                    </div>
+                    <div class="recommendation-rpm">
+                        ${Math.round(gear.rpm)}
+                        <small>rpm</small>
+                    </div>
+                    <div class="recommendation-rank">
+                        ${index + 1}.
+                    </div>
+                `;
+
+                list.appendChild(card);
+            });
+        }
+
         function updateCadenceDisplay() {
             if (currentSpeedKmh <= 1) {
                 document.getElementById('rpm-value').innerText = "--";
                 document.getElementById('speed-value').innerText = `Sebesség: ${currentSpeedKmh.toFixed(1)} km/h`;
+                updateGearRecommendations();
                 return;
             }
             const gearRatio = frontTeeth / rearTeeth;
             const rpm = (currentSpeedKmh * 16666.67) / (WHEEL_CIRCUMFERENCE * gearRatio);
             document.getElementById('rpm-value').innerText = Math.round(rpm);
             document.getElementById('speed-value').innerText = `Sebesség: ${currentSpeedKmh.toFixed(1)} km/h`;
+            updateGearRecommendations();
         }
 
+        renderBikeList();
+        fillBikeForm(activeBike);
+        document.getElementById("app-title").innerText=activeBike.name;
+        document.getElementById("active-bike-name").innerText=activeBike.name;
         renderAllGearSelectors();
+        updateGearRecommendations();
         enableSwipe("front-selector", "front-window");
         enableSwipe("rear-selector", "rear-window");
 
@@ -584,87 +984,262 @@
             navigator.geolocation.watchPosition(
                 function (position) {
                     let speedMs = position.coords.speed;
+                    if (speedSource !== "gps") return;
                     if (speedMs !== null && speedMs !== undefined) {
                         currentSpeedKmh = speedMs * 3.6;
-                        document.getElementById('gps-status').innerText = "GPS kapcsolat aktív ✔";
-                        document.getElementById('gps-status').style.color = "#4CAF50";
+                        document.getElementById('speed-status').innerText = "GPS kapcsolat aktív ✔";
+                        document.getElementById('speed-status').style.color = "#4CAF50";
                     } else {
-                        document.getElementById('gps-status').innerText = "Mozogj a bringával a méréshez!";
-                        document.getElementById('gps-status').style.color = "#ff9800";
+                        document.getElementById('speed-status').innerText = "Mozogj a bringával a méréshez!";
+                        document.getElementById('speed-status').style.color = "#ff9800";
                         currentSpeedKmh = 0;
                     }
                     updateCadenceDisplay();
                 },
                 function (error) {
-                    const statusDiv = document.getElementById('gps-status');
-                    statusDiv.style.color = "#f44336"; statusDiv.innerText = error.code === 1 ? "Engedélyezd a GPS-t!" : "GPS jel hiba.";
+                    if (speedSource !== "gps") return;
+                    const statusDiv = document.getElementById('speed-status');
+                    statusDiv.style.color = "#f44336";
+                    statusDiv.innerText = error.code === 1 ? "Engedélyezd a GPS-t!" : "GPS jel hiba.";
                 }, { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 });
         }
-        // --- GYORSULÁSMÉRŐ (ACCELEROMETER) LOGIKA ---
-        function startSensors() {
-            // Ellenőrizzük, hogy iOS eszközről van-e szó, mert ott külön ablakos engedélykérés kell
-            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-                DeviceMotionEvent.requestPermission().then(permissionState => {
-                    if (permissionState === 'granted') {
-                        activateMotionListener();
+        navigator.usb?.addEventListener("disconnect", event => {
+            if (arduinoDevice && event.device === arduinoDevice) {
+                arduinoConnected = false;
+                arduinoDevice = null;
+                lastArduinoPulseTime = null;
+                if (speedSource === "arduino") {
+                    currentSpeedKmh = 0;
+                    updateCadenceDisplay();
+                    const status = document.getElementById("speed-status");
+                    status.innerText = "Arduino leválasztva.";
+                    status.style.color = "#f44336";
+                }
+            }
+        });
 
-                    } else {
-                        document.getElementById('sensor-status').innerText = "Megtagadott szenzor hozzáférés.";
-                        document.getElementById('sensor-status').style.color = "#f44336";
+        // --- GYORSULÁSMÉRŐ (ACCELEROMETER) LOGIKA ---
+        let motionListenerStarted = false;
+        let gravitySensor = null;
+        let receivedValidMotionData = false;
+
+        // 0.08 = erős simítás. Nagyobb érték gyorsabb, de ugrálósabb.
+        const MOTION_SMOOTHING = 0.08;
+        const TILT_DEADBAND_DEG = 0.25;
+
+        let filteredX = null;
+        let filteredY = null;
+        let filteredZ = null;
+        let displayedTilt = 0;
+        let filteredOrientationTilt = null;
+        let orientationListenerStarted = false;
+
+        async function startSensors() {
+            const status = document.getElementById("sensor-status");
+
+            try {
+                // iOS-en külön felhasználói engedély szükséges.
+                if (
+                    typeof DeviceMotionEvent !== "undefined" &&
+                    typeof DeviceMotionEvent.requestPermission === "function"
+                ) {
+                    const permission =
+                        await DeviceMotionEvent.requestPermission();
+
+                    if (permission !== "granted") {
+                        throw new Error("Megtagadott szenzor hozzáférés.");
                     }
-                }).catch(console.error);
-            } else {// Android vagy asztali böngésző esetén közvetlenül indulhat
+                }
+
+                if (
+                    typeof DeviceOrientationEvent !== "undefined" &&
+                    typeof DeviceOrientationEvent.requestPermission === "function"
+                ) {
+                    const orientationPermission =
+                        await DeviceOrientationEvent.requestPermission();
+
+                    if (orientationPermission !== "granted") {
+                        throw new Error("Megtagadott tájolás-hozzáférés.");
+                    }
+                }
+
                 activateMotionListener();
+                activateOrientationListener();
+            } catch (error) {
+                status.innerText = error.message;
+                status.style.color = "#f44336";
             }
         }
+
         function activateMotionListener() {
             const status = document.getElementById("sensor-status");
 
-            if (!("DeviceMotionEvent" in window)) {
-                status.innerText = "Ez a böngésző nem támogatja a gyorsulásmérőt.";
+            if (motionListenerStarted) {
+                status.innerText = "A szenzorok már aktívak ✔";
+                status.style.color = "#4CAF50";
+                return;
+            }
+
+            motionListenerStarted = true;
+            receivedValidMotionData = false;
+            status.innerText = "Szenzoradatokra várok...";
+            status.style.color = "#ff9800";
+
+            if ("DeviceMotionEvent" in window) {
+                window.addEventListener("devicemotion", handleMotionEvent);
+            }
+
+            // Ha a régi devicemotion API 2 másodperc alatt nem ad használható
+            // értéket, Android Chrome alatt megpróbáljuk a GravitySensor API-t.
+            setTimeout(() => {
+                if (!receivedValidMotionData) {
+                    startGravitySensorFallback();
+                }
+            }, 2000);
+        }
+
+        function handleMotionEvent(event) {
+            const acceleration = event.accelerationIncludingGravity;
+
+            if (!acceleration) {
+                return;
+            }
+
+            const x = Number(acceleration.x);
+            const y = Number(acceleration.y);
+            const z = Number(acceleration.z);
+
+            // A korábbi kód a null/NaN értékeket 0-vá alakította,
+            // ezért látszott folyamatosan 0.00.
+            if (![x, y, z].every(Number.isFinite)) {
+                return;
+            }
+
+            receivedValidMotionData = true;
+            updateMotionDisplay(x, y, z);
+        }
+
+        function startGravitySensorFallback() {
+            const status = document.getElementById("sensor-status");
+
+            if (!("GravitySensor" in window)) {
+                status.innerText =
+                    "A böngésző nem adott használható gyorsulásadatot.";
                 status.style.color = "#f44336";
                 return;
             }
 
-            status.innerText = "Szenzoradatokra várok...";
-            status.style.color = "#ff9800";
+            try {
+                gravitySensor = new GravitySensor({ frequency: 30 });
 
-            window.addEventListener("devicemotion", function (event) {
-                const acceleration = event.accelerationIncludingGravity;
+                gravitySensor.addEventListener("reading", () => {
+                    const x = Number(gravitySensor.x);
+                    const y = Number(gravitySensor.y);
+                    const z = Number(gravitySensor.z);
 
-                if (!acceleration) {
-                    status.innerText = "A böngésző nem adott szenzoradatot.";
+                    if (![x, y, z].every(Number.isFinite)) {
+                        return;
+                    }
+
+                    receivedValidMotionData = true;
+                    updateMotionDisplay(x, y, z);
+                });
+
+                gravitySensor.addEventListener("error", event => {
+                    status.innerText =
+                        "Szenzorhiba: " + event.error.message;
                     status.style.color = "#f44336";
-                    return;
-                }
+                });
 
-                const x = acceleration.x ?? 0;
-                const y = acceleration.y ?? 0;
-                const z = acceleration.z ?? 0;
+                gravitySensor.start();
+                status.innerText = "GravitySensor adatokra várok...";
+            } catch (error) {
+                status.innerText = "Szenzorhiba: " + error.message;
+                status.style.color = "#f44336";
+            }
+        }
 
-                document.getElementById("acc-x").innerText = x.toFixed(2);
-                document.getElementById("acc-y").innerText = y.toFixed(2);
-                document.getElementById("acc-z").innerText = z.toFixed(2);
+        function activateOrientationListener() {
+            if (orientationListenerStarted) {
+                return;
+            }
 
-                const totalG = Math.sqrt(
-                    x * x + y * y + z * z
-                ) / 9.81;
+            orientationListenerStarted = true;
 
-                document.getElementById("acc-g").innerText =
-                    totalG.toFixed(2) + " G";
+            if ("DeviceOrientationEvent" in window) {
+                window.addEventListener(
+                    "deviceorientation",
+                    handleOrientationEvent
+                );
+            }
+        }
 
-                const tiltRad = Math.atan2(y, z);
-                const tiltDeg = tiltRad * 180 / Math.PI;
+        function handleOrientationEvent(event) {
+            const beta = Number(event.beta);   // előre/hátra döntés
+            const gamma = Number(event.gamma); // balra/jobbra döntés
 
-                currentRawTilt = tiltDeg;
+            if (![beta, gamma].every(Number.isFinite)) {
+                return;
+            }
 
-                const calibratedTilt = currentRawTilt - tiltOffset;
+            // A nagyobb tényleges döntést használjuk, így a telefon
+            // álló és fekvő helyzetében is reagál a mozgatásra.
+            const rawTilt =
+                Math.abs(beta) >= Math.abs(gamma) ? beta : gamma;
 
-                document.getElementById("tilt-value").innerText =
-                    Math.round(calibratedTilt) + "°";
+            if (filteredOrientationTilt === null) {
+                filteredOrientationTilt = rawTilt;
+            } else {
+                filteredOrientationTilt +=
+                    MOTION_SMOOTHING *
+                    (rawTilt - filteredOrientationTilt);
+            }
 
-                status.innerText = "Szenzorok aktívak ✔";
-                status.style.color = "#4CAF50";
-            });
+            currentRawTilt = filteredOrientationTilt;
+            const calibratedTilt = currentRawTilt - tiltOffset;
+
+            if (
+                Math.abs(calibratedTilt - displayedTilt) >=
+                TILT_DEADBAND_DEG
+            ) {
+                displayedTilt = calibratedTilt;
+            }
+
+            document.getElementById("tilt-value").innerText =
+                displayedTilt.toFixed(1) + "°";
+        }
+
+        function updateMotionDisplay(x, y, z) {
+            const status = document.getElementById("sensor-status");
+
+            if (filteredX === null) {
+                filteredX = x;
+                filteredY = y;
+                filteredZ = z;
+            } else {
+                // Exponenciális aluláteresztő szűrő a rezgések kisimítására.
+                filteredX += MOTION_SMOOTHING * (x - filteredX);
+                filteredY += MOTION_SMOOTHING * (y - filteredY);
+                filteredZ += MOTION_SMOOTHING * (z - filteredZ);
+            }
+
+            document.getElementById("acc-x").innerText =
+                filteredX.toFixed(2);
+            document.getElementById("acc-y").innerText =
+                filteredY.toFixed(2);
+            document.getElementById("acc-z").innerText =
+                filteredZ.toFixed(2);
+
+            const totalG = Math.sqrt(
+                filteredX * filteredX +
+                filteredY * filteredY +
+                filteredZ * filteredZ
+            ) / 9.81;
+
+            document.getElementById("acc-g").innerText =
+                totalG.toFixed(2) + " G";
+
+            status.innerText = "Szenzorok aktívak ✔";
+            status.style.color = "#4CAF50";
         }
     </script>
